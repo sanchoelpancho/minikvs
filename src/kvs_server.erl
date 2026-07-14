@@ -1,7 +1,7 @@
 -module(kvs_server).
 -export([start/0, loop/1]).
 
--record(key_value_pair, {key, data}).
+% -record(key_value_pair, {key, data}).
 
 start() ->
     spawn(?MODULE, loop, [maps:new()]).
