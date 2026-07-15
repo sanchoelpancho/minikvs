@@ -4,8 +4,8 @@
 get(Server, Key) -> 
     Server ! {self(), {get, Key}},
     receive
-        {ok, Value} -> 
-            {ok, Value};
+        {ok, {Key, Value}} -> 
+            {ok, {Key, Value}};
         {error, key_not_found} ->
             {error, key_not_found}
     end.

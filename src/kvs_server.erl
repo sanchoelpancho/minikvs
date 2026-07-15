@@ -11,7 +11,7 @@ loop(Store) ->
     receive
         {Client, {get, Key}} -> 
             Reply = case maps:find(Key, Store) of
-                {ok, Value} -> {ok, Value};
+                {ok, Value} -> {ok, {Key, Value}};
                 error -> {error, key_not_found}
             end,
             Client ! Reply,
