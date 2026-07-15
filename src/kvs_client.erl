@@ -1,5 +1,5 @@
 -module(kvs_client).
--export([get/2, set/2]).
+-export([get/2, set/2, delete/2]).
 
 get(Server, Key) -> 
     Server ! {self(), {get, Key}},
@@ -13,8 +13,13 @@ get(Server, Key) ->
 set(Server, {Key, Data}) ->
     Server ! {self(), {set, {Key, Data}}},
     receive
-        {ok, {Key, Data}} ->
-            {ok, {Key, Data}}
+        {ok, {Key, Data}, added} ->
+            {ok, {Key, Data}, added}
     end.
 
-% delete(Server, Key) ->
+delete(Server, Key) ->
+    Server ! {self(), {remove, Key}},
+    receive
+        {ok, Key, removed} ->
+            {ok, Key, removed}
+    end.

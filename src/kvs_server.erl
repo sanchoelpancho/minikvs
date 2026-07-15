@@ -18,7 +18,10 @@ loop(Store) ->
             loop(Store);
         {Client, {set, {Key, Data}}} ->
             UpdatedStore = maps:put(Key, Data, Store),
-            Client ! {ok, {Key, Data}},
+            Client ! {ok, {Key, Data}, added},
+            loop(UpdatedStore);
+        {Client, {delete, Key}} ->
+            UpdatedStore = maps:remove(Key, Store),
+            Client ! {ok, Key, removed},
             loop(UpdatedStore)
-        % {Client, {delete, Key}} ->
     end.
