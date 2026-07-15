@@ -23,7 +23,8 @@ loop(Store) ->
         {Client, {remove, Key}} ->
             UpdatedStore = maps:remove(Key, Store),
             Client ! {ok, Key, removed},
-            loop(UpdatedStore)
-    after 5000 ->
-        {error, timeout}
+            loop(UpdatedStore);
+        Other ->
+            io:format("Unexpected message: ~p~n", [Other]),
+            loop(Store)
     end.
