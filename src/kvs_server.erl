@@ -24,4 +24,6 @@ loop(Store) ->
             UpdatedStore = maps:remove(Key, Store),
             Client ! {ok, Key, removed},
             loop(UpdatedStore)
+    after 5000 ->
+        {error, timeout}
     end.
