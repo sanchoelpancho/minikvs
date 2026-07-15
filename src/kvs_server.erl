@@ -10,7 +10,11 @@ start() ->
 loop(Store) ->
     receive
         {Client, {get, Key}} -> 
-            Client ! maps:find(Key, Store),
+            Reply = case maps:find(Key, Store) of
+                {ok, Value} -> {ok, Value};
+                error -> {error, key_not_found}
+            end,
+            Client ! Reply,
             loop(Store);
         {Client, {set, {Key, Data}}} ->
             UpdatedStore = maps:put(Key, Data, Store),

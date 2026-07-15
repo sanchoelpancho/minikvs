@@ -5,9 +5,9 @@ get(Server, Key) ->
     Server ! {self(), {get, Key}},
     receive
         {ok, Value} -> 
-            Value;
-        {error} ->
-            error
+            {ok, Value};
+        {error, key_not_found} ->
+            {error, key_not_found}
     end.
 
 set(Server, {Key, Data}) ->
