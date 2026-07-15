@@ -20,7 +20,7 @@ loop(Store) ->
             UpdatedStore = maps:put(Key, Data, Store),
             Client ! {ok, {Key, Data}, added},
             loop(UpdatedStore);
-        {Client, {delete, Key}} ->
+        {Client, {remove, Key}} ->
             UpdatedStore = maps:remove(Key, Store),
             Client ! {ok, Key, removed},
             loop(UpdatedStore)
