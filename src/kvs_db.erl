@@ -5,12 +5,18 @@
 -include("kvs_db.hrl").
 
 initialize_db() ->
-    mnesia:create_schema([node()]), 
+    case mnesia:create_schema([node()]) of
+        ok -> ok;
+        {error, {_, {already_exists, _}}} -> ok
+    end, 
     mnesia:start(), 
-    mnesia:create_table(kvs, [ 
+    case mnesia:create_table(kvs, [ 
         {attributes, record_info(fields, entry)},
         {record_name, entry}
-    ]).
+    ]) of
+        {atomic, ok} -> ok;
+        {aborted, {already_exists, kvs}} -> ok
+    end.
 
 
 stop_db() ->
