@@ -1,30 +1,36 @@
 -module(kvs_server).
--export([start/0, loop/1]).
+-export([start_link/0, loop/0]).
 
-% -record(key_value_pair, {key, data}).
+-include("kvs_db.hrl").
 
-start() ->
-    spawn(?MODULE, loop, [maps:new()]).
+start_link() ->
+    Pid = spawn_link(?MODULE, loop, []),
+    register(kvs_server, Pid),
+    {ok, Pid}.
     
 
-loop(Store) ->
+loop() ->
     receive
         {Client, {get, Key}} -> 
-            Reply = case maps:find(Key, Store) of
-                {ok, Value} -> {ok, {Key, Value}};
-                error -> {error, key_not_found}
+            Reply = case mnesia:transaction(fun() -> mnesia:read(kvs, Key) end) of
+                {atomic, [#entry{key = Key, data = Value}]}     ->      {ok, {Key, Value}};
+                {atomic, []}                                    ->      {error, key_not_found}
             end,
             Client ! Reply,
-            loop(Store);
-        {Client, {set, {Key, Data}}} ->
-            UpdatedStore = maps:put(Key, Data, Store),
-            Client ! {ok, {Key, Data}, added},
-            loop(UpdatedStore);
+            loop();
+        {Client, {set, Entry}} ->
+            Reply = case mnesia:transaction(fun() -> mnesia:write(kvs, Entry, write) end) of
+                {atomic, ok}                                    ->      {ok, {Entry#entry.key, Entry#entry.data}, added}
+            end,
+            Client ! Reply,
+            loop();
         {Client, {remove, Key}} ->
-            UpdatedStore = maps:remove(Key, Store),
-            Client ! {ok, Key, removed},
-            loop(UpdatedStore);
+            Reply = case mnesia:transaction(fun() -> mnesia:delete({kvs, Key}) end) of
+                {atomic, ok}                                    ->      {ok, Key, removed}
+            end,
+            Client ! Reply,
+            loop();
         Other ->
             io:format("Unexpected message: ~p~n", [Other]),
-            loop(Store)
+            loop()
     end.
