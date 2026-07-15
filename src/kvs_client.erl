@@ -18,7 +18,7 @@ set(Server, {Key, Data}) ->
     end.
 
 remove(Server, Key) ->
-    Server ! {self(), {delete, Key}},
+    Server ! {self(), {remove, Key}},
     receive
         {ok, Key, removed} ->
             {ok, Key, removed}
