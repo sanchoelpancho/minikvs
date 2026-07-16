@@ -7,12 +7,13 @@ init(Req0, State) ->
     Key = cowboy_req:binding(key, Req0),
     Req1 = case Method of
         <<"GET">> -> 
-            case kvs_client:get(Key) of
-                {ok, {Key, Value}}      -> Reply = {200, #{status => <<"found">>, key => Key, value => <<Value>>}};
-                {error, key_not_found}  -> Reply = {404, #{status => <<"key not found">>}}
+            Reply = case kvs_client:get(Key) of
+                {ok, {Key, Value}}      -> {200, #{status => <<"found">>, key => Key, value => Value}};
+                {error, key_not_found}  -> {404, #{status => <<"key not found">>}}
             end,
-            {Status, Body} = Reply,
-        cowboy_req:reply(Status,
+            {Status, Map} = Reply,
+            Body = json:encode(Map),
+            cowboy_req:reply(Status,
                 #{<<"content-type">> => <<"application/json">>},
                 Body,
                 Req0);
