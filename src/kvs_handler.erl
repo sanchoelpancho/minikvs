@@ -24,7 +24,6 @@ init(Req0, State) ->
             KeyValuePair = json:decode(ReqBody),
             Reply = case kvs_client:set(maps:get(<<"key">>, KeyValuePair), maps:get(<<"data">>, KeyValuePair)) of
                 {ok, {SetKey, SetData}, added}        ->    {200, #{status => <<"added">>, key => SetKey, data => SetData}};
-                {_}                                   ->    {400, #{status => <<"error">>}}
             end,
             {Status, Map} = Reply,
             Body = json:encode(Map),
