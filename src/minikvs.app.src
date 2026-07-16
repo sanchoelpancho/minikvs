@@ -5,7 +5,9 @@
     {mod, {minikvs_app, []}},
     {applications, [
         kernel,
-        stdlib
+        stdlib,
+        mnesia,
+        cowboy
     ]},
     {env, []},
     {modules, []},
