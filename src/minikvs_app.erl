@@ -11,7 +11,7 @@
 
 start(_StartType, _StartArgs) ->
     kvs_db:initialize_db(),
-    minikvs_sup:start_link(),
+    {ok, SupPid} = minikvs_sup:start_link(),
     %%%%%%%%%%%%%%%%% Cowboy HTTP listener code %%%%%%%%%%%%%%%%%%%%%%%%%%%
     Dispatch = cowboy_router:compile(kvs_router:routes()),
     cowboy:start_clear(my_http_listener,
