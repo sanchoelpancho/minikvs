@@ -13,10 +13,12 @@ init(Req0, State) ->
             end,
             {Status, Map} = Reply,
             Body = json:encode(Map),
-            cowboy_req:reply(Status,
+            cowboy_req:reply(
+                Status,
                 #{<<"content-type">> => <<"application/json">>},
                 Body,
-                Req0);
+                Req0
+            );
         <<"PUT">> ->
             {ok, ReqBody, Req0a} = cowboy_req:read_body(Req0),
             KeyValuePair = json:decode(ReqBody),
@@ -26,10 +28,24 @@ init(Req0, State) ->
             end,
             {Status, Map} = Reply,
             Body = json:encode(Map),
-            cowboy_req:reply(Status,
+            cowboy_req:reply(
+                Status,
                 #{<<"content-type">> => <<"application/json">>},
                 Body,
-                Req0a);
+                Req0a
+            );
+        <<"DELETE">> ->
+            Reply = case kvs_client:remove(Key) of
+                {ok, RemovedKey, removed}                    ->   {200, #{status => <<"removed">>, key => RemovedKey}}
+            end,
+            {Status, Map} = Reply,
+            Body = json:encode(Map),
+            cowboy_req:reply(
+                Status,
+                #{<<"content-type">> => <<"application/json">>},
+                Body,
+                Req0
+            );
         _ ->
             cowboy_req:reply(405, #{}, <<>>, Req0)
     end,
