@@ -9,7 +9,8 @@ init(Req0, State) ->
         <<"GET">> ->
             Reply = case kvs_client:get(Key) of
                 {ok, {GetKey, GetData}} -> {200, #{status => <<"found">>, key => GetKey, data => GetData}};
-                {error, key_not_found}  -> {404, #{status => <<"key not found">>}}
+                {error, key_not_found}  -> {404, #{status => <<"key not found">>}};
+                {error, Reason}         -> {500, #{status => <<"error">>, reason => list_to_binary(io_lib:format("~p", [Reason]))}}
             end,
             {Status, Map} = Reply,
             Body = json:encode(Map),
@@ -21,7 +22,8 @@ init(Req0, State) ->
             );
         <<"DELETE">> ->
             Reply = case kvs_client:remove(Key) of
-                {ok, RemovedKey, removed} -> {200, #{status => <<"removed">>, key => RemovedKey}}
+                {ok, RemovedKey, removed} -> {200, #{status => <<"removed">>, key => RemovedKey}};
+                {error, Reason}           -> {500, #{status => <<"error">>, reason => list_to_binary(io_lib:format("~p", [Reason]))}}
             end,
             {Status, Map} = Reply,
             Body = json:encode(Map),

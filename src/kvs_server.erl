@@ -14,19 +14,22 @@ loop() ->
         {Client, {get, Key}} -> 
             Reply = case mnesia:transaction(fun() -> mnesia:read(kvs, Key) end) of
                 {atomic, [#entry{key = Key, data = Value}]}     ->      {ok, {Key, Value}};
-                {atomic, []}                                    ->      {error, key_not_found}
+                {atomic, []}                                    ->      {error, key_not_found};
+                {aborted, Reason}                               ->      {error, Reason}
             end,
             Client ! Reply,
             loop();
         {Client, {set, Entry}} ->
             Reply = case mnesia:transaction(fun() -> mnesia:write(kvs, Entry, write) end) of
-                {atomic, ok}                                    ->      {ok, {Entry#entry.key, Entry#entry.data}, added}
+                {atomic, ok}                                    ->      {ok, {Entry#entry.key, Entry#entry.data}, added};
+                {aborted, Reason}                               ->      {error, Reason}
             end,
             Client ! Reply,
             loop();
         {Client, {remove, Key}} ->
             Reply = case mnesia:transaction(fun() -> mnesia:delete({kvs, Key}) end) of
-                {atomic, ok}                                    ->      {ok, Key, removed}
+                {atomic, ok}                                    ->      {ok, Key, removed};
+                {aborted, Reason}                               ->      {error, Reason}
             end,
             Client ! Reply,
             loop();
