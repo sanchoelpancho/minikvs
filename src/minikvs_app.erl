@@ -17,7 +17,8 @@ start(_StartType, _StartArgs) ->
     cowboy:start_clear(my_http_listener,
         [{port, 8080}],
         #{env => #{dispatch => Dispatch}}
-    ).
+    ),
+    {SupPid}.
 
 stop(_State) ->
     kvs_db:stop_db(),
