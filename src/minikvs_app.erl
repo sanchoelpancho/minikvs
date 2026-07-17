@@ -20,6 +20,7 @@ start(_StartType, _StartArgs) ->
     ).
 
 stop(_State) ->
+    cowboy:stop_listener(my_http_listener),
     kvs_db:stop_db(),
     ok.
 
